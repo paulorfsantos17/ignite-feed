@@ -1,34 +1,48 @@
+import { format, formatDistanceToNow } from "date-fns";
+import ptBr from "date-fns/locale/pt-BR";
+
 import Avatar from "./Avatar";
 import { Comment } from "./Comment";
 import styles from "./Post.module.css";
-export function Post() {
+
+export function Post({ post }) {
+  const publishedDateFormatted = format(
+    post.publishedAt,
+    "d 'de' LLLL 'ás' HH:mm'h'",
+    {
+      locale: ptBr,
+    }
+  );
+  const publishedDateRelativeToNow = formatDistanceToNow(post.publishedAt, {
+    locale: ptBr,
+    addSuffix: true,
+  });
   return (
     <article className={styles.post}>
       <header>
         <div className={styles.author}>
-          <Avatar src="https://avatars.githubusercontent.com/u/42043880?v=4"/>
+          <Avatar src={post.author.avatarUrl} />
           <div className={styles.authorInfo}>
-            <strong>Paulo Santos</strong>
-            <span>Front-End Developer</span>
+            <strong>{post.author.name}</strong>
+            <span>{post.author.role}</span>
           </div>
         </div>
-        <time title="11 de Maio ás 08:13h" dateTime="2022-05-11 08:13:30">
-          Publicado há 1h
+        <time
+          title={publishedDateFormatted}
+          dateTime={post.publishedAt.toISOString()}>
+          {publishedDateRelativeToNow}
         </time>
       </header>
       <div className={styles.content}>
-        <p>Fala galeraa 👋</p>
-        <p>
-          Acabei de subir mais um projeto no meu portifa. É um projeto que fiz
-          no NLW Return, evento da Rocketseat. O nome do projeto é DoctorCare 🚀
-        </p>
-        <p>
-          <a href="#">jane.design/doctorcare</a>
-        </p>
-        <p>
-          <a href="#">#novoprojeto</a> <a href="#">#nlw</a>{" "}
-          <a href="#">#rocketseat</a>{" "}
-        </p>
+        {post.content.map((line, index) => {
+          return line.type === "link" ? (
+            <p key={index}>
+              <a href="#">{line.content}</a>
+            </p>
+          ) : (
+            <p key={index}>{line.content}</p>
+          );
+        })}
       </div>
 
       <form className={styles.commentForm}>
@@ -38,7 +52,7 @@ export function Post() {
           <button type="submit">Publicar</button>
         </footer>
       </form>
-      <div className={styles.commentList} >
+      <div className={styles.commentList}>
         <Comment />
         <Comment />
         <Comment />
